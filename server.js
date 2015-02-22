@@ -12,6 +12,6 @@ var object = {
 
 var router = jsonServer.router(object); // Express router
 var server = jsonServer.create();       // Express server
-
+var port = process.env.PORT || 3000;
 server.use(router);
-server.listen(3000);
+server.listen(port);
