@@ -60,16 +60,19 @@ var router = jsonServer.router(object); // Express router
 var server = jsonServer.create();       // Express server
 var port = process.env.PORT || 9002;
 
-// This line is from the Node.js HTTPS documentation.
-var options = {
-    key: fs.readFileSync('cert/server.key'),
-    cert: fs.readFileSync('cert/server.crt')
-};
+
 
 server.use(router);
-if(process.env.hasOwnProperty('AZURE')){
-    //server.listen(port);
+if(port !== 9002){
+    server.listen(port);
 } else {
+
+    // This line is from the Node.js HTTPS documentation.
+    var options = {
+        key: fs.readFileSync('cert/server.key'),
+        cert: fs.readFileSync('cert/server.crt')
+    };
+
     // Create an HTTPS service identical to the HTTP service.
     https.createServer(options, server).listen(port);
 }
