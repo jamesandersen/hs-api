@@ -10,6 +10,26 @@ var router = jsonServer.router(__dirname + '/db.json'); // Express router
 var server = jsonServer.create();       // Express server
 var port = process.env.PORT || 9002;
 
+var cors = require('cors');
+
+var whitelist = [
+    'http://localhost', // add here the url when you access to your angular app
+    'https://localhost:9001',
+    'http://jander.me'
+];
+
+var corsOptions = {
+    credentials: true,
+    origin: function(origin, callback) {
+        console.log('foo: ' + origin);
+        var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
+        callback(null, originIsWhitelisted);
+    },
+    methods: ['GET', 'PUT', 'POST', 'PATCH', 'DELETE'],
+    allowedHeaders: 'accept, content-type'
+};
+
+server.use(cors(corsOptions));
 server.use(router);
 if(port !== 9002){
     server.listen(port);
