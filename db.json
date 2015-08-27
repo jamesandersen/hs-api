@@ -50,6 +50,11 @@
           "id": "jkl",
           "summary": "Math",
           "bgcolor": "#0091ea"
+        },
+        {
+          "id": "mno",
+          "summary": "Miscellaneous",
+          "bgcolor": "#9900ff"
         }
       ]
     },
@@ -103,6 +108,11 @@
           "id": "jkl",
           "summary": "Math",
           "bgcolor": "#0091ea"
+        },
+        {
+          "id": "mno",
+          "summary": "Miscellaneous",
+          "bgcolor": "#9900ff"
         }
       ]
     },
