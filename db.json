@@ -4,6 +4,13 @@
       "id": 117787249652701000000,
       "userId": "117787249652700998593",
       "name": "James",
+      "colleagues": [
+        {
+          "name": "Karen",
+          "userId": "106433374949808474031",
+          "email": "jkandersen@gmail.com"
+        }
+      ],
       "students": [
         {
           "userId": "112678812700708466620",
@@ -62,6 +69,13 @@
       "id": 106433374949808470000,
       "userId": "106433374949808474031",
       "name": "Karen",
+      "colleagues": [
+        {
+          "name": "James",
+          "userId": "117787249652700998593",
+          "email": "james@jander.me"
+        }
+      ],
       "students": [
         {
           "userId": "112678812700708466620",
