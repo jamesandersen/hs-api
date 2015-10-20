@@ -1,8 +1,12 @@
 // Todo App
 var DocumentDBClient = require('documentdb').DocumentClient;
 var config = require('./config');
+var constants = require('./utils/constants');
+var tokens = require('./utils/tokens');
 var Profiles = require('./routes/profiles');
 var ProfilesDao = require('./models/profiles');
+
+var users = require('./routes/users');
 
 var express = require('express');
 var path = require('path');
@@ -25,7 +29,8 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser(constants.CLIENT_SECRET));
+app.use(tokens.extractToken);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Todo App
@@ -39,6 +44,9 @@ profilesDao.init();
 app.get('/', profiles.showTasks.bind(profiles));
 app.post('/addtask', profiles.addTask.bind(profiles));
 app.post('/completetask', profiles.completeTask.bind(profiles));
+
+app.use('/users', users.router);
+app.use('/oauth2Callback', users.oauth2Callback);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
