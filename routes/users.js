@@ -8,6 +8,16 @@ var OAuth2 = google.auth.OAuth2;
 var key = require('../client_secret.json');
 var oauth2Client = new OAuth2(key.web.client_id, key.web.client_secret, key.web.redirect_uris[2]);
 
+var DocumentDBClient = require('documentdb').DocumentClient;
+var config = require('../config');
+var docDbClient = new DocumentDBClient(config.host, {
+    masterKey: config.authKey
+});
+var ProfilesDao = require('../models/profiles');
+var profilesDao = new ProfilesDao(docDbClient, config.databaseId, config.collectionId);
+profilesDao.init();
+
+
 var router = express.Router();
 
 /* GET users listing. */
@@ -38,10 +48,37 @@ router.get('/profile', function(req, res) {
   plus.people.get({ userId: 'me', auth: oauth2Client }, function(err, response) {
     if(err) {
       throw err;
-      
     }
     
-    res.send(response);
+    profilesDao.getById(response.id, function(err, profile) {
+      if(err) {
+        throw err;
+      }
+      
+      if(!profile.id) {
+        var staticProfiles = require('../db.json');
+        var sp = null;
+        staticProfiles.profiles.forEach(function(p) {
+          if(p.userId.toString() === response.id) {
+            sp = p;
+          }
+        });
+        if(sp ) {
+          sp.id = sp.userId;
+          profilesDao.add(sp, function(err) {
+            if(err) {
+              throw err;
+            }
+            res.send({profile: sp, me: response });
+          });
+        } else {
+          throw "no profile";
+        }
+        
+      } else {
+        res.send({profile: profile, me: response });
+      }
+    });
   });
 });
 

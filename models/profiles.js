@@ -1,7 +1,7 @@
 var DocumentDBClient = require('documentdb').DocumentClient;
 var docdbUtils = require('./docdbUtils');
 
-function TaskDao(documentDBClient, databaseId, collectionId) {
+function ProfileDao(documentDBClient, databaseId, collectionId) {
   this.client = documentDBClient;
   this.databaseId = databaseId;
   this.collectionId = collectionId;
@@ -10,7 +10,7 @@ function TaskDao(documentDBClient, databaseId, collectionId) {
   this.collection = null;
 }
 
-TaskDao.prototype = {
+ProfileDao.prototype = {
   init: function(callback) {
     var self = this;
 
@@ -30,22 +30,34 @@ TaskDao.prototype = {
     });
   },
 
-  find: function(querySpec, callback) {
+  getById: function(id, callback) {
     var self = this;
+
+    var querySpec = {
+      query: 'SELECT * FROM root r WHERE r.id=@id',
+      parameters: [{
+        name: '@id',
+        value: id
+      }]
+    };
 
     self.client.queryDocuments(self.collection._self, querySpec).toArray(function(err, results) {
       if (err) {
         callback(err);
+      } 
+      
+      if(results.length === 1) {
+        callback(null, results[0]);
       } else {
-        callback(null, results);
+        callback ("No profile");
       }
     });
   },
 
-  addItem: function(item, callback) {
+  add: function(item, callback) {
     var self = this;
-    item.date = Date.now();
-    item.completed = false;
+    //item.date = Date.now();
+    //item.completed = false;
     self.client.createDocument(self.collection._self, item, function(err, doc) {
       if (err) {
         callback(err);
@@ -55,7 +67,7 @@ TaskDao.prototype = {
     });
   },
 
-  updateItem: function(itemId, callback) {
+  update: function(itemId, callback) {
     var self = this;
 
     self.getItem(itemId, function(err, doc) {
@@ -95,4 +107,4 @@ TaskDao.prototype = {
   }
 };
 
-module.exports = TaskDao;
+module.exports = ProfileDao;

@@ -34,7 +34,7 @@ app.use(tokens.extractToken);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Todo App
-var docDbClient = new DocumentDBClient(config.host, {
+/*var docDbClient = new DocumentDBClient(config.host, {
     masterKey: config.authKey
 });
 var profilesDao = new ProfilesDao(docDbClient, config.databaseId, config.collectionId);
@@ -43,7 +43,7 @@ profilesDao.init();
 
 app.get('/', profiles.showTasks.bind(profiles));
 app.post('/addtask', profiles.addTask.bind(profiles));
-app.post('/completetask', profiles.completeTask.bind(profiles));
+app.post('/completetask', profiles.completeTask.bind(profiles)); */
 
 app.use('/users', users.router);
 app.use('/oauth2Callback', users.oauth2Callback);
