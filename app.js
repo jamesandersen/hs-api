@@ -1,7 +1,5 @@
 // Todo App
-var DocumentDBClient = require('documentdb').DocumentClient;
-var config = require('./config');
-var constants = require('./utils/constants');
+var config = require('./utils/config');
 var tokens = require('./utils/tokens');
 var Profiles = require('./routes/profiles');
 var ProfilesDao = require('./models/profiles');
@@ -20,6 +18,28 @@ var users = require('./routes/users');
 
 var app = express();
 
+var fs = require('fs');
+var cors = require('cors');
+var https = require('https');
+
+var whitelist = [
+    'http://localhost', // add here the url when you access to your angular app
+    'https://localhost:9001',
+    'http://jander.me'
+];
+
+var corsOptions = {
+    credentials: true,
+    origin: function(origin, callback) {
+        console.log('foo: ' + origin);
+        var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
+        callback(null, originIsWhitelisted);
+    },
+    methods: ['GET', 'PUT', 'POST', 'PATCH', 'DELETE'],
+    allowedHeaders: 'accept, content-type, Authorization'
+};
+app.use(cors(corsOptions));
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -29,21 +49,9 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser(constants.CLIENT_SECRET));
+app.use(cookieParser(config.GOOGLE_CLIENT_SECRET));
 app.use(tokens.extractToken);
 app.use(express.static(path.join(__dirname, 'public')));
-
-// Todo App
-/*var docDbClient = new DocumentDBClient(config.host, {
-    masterKey: config.authKey
-});
-var profilesDao = new ProfilesDao(docDbClient, config.databaseId, config.collectionId);
-var profiles = new Profiles(profilesDao);
-profilesDao.init();
-
-app.get('/', profiles.showTasks.bind(profiles));
-app.post('/addtask', profiles.addTask.bind(profiles));
-app.post('/completetask', profiles.completeTask.bind(profiles)); */
 
 app.use('/users', users.router);
 app.use('/oauth2Callback', users.oauth2Callback);
@@ -79,6 +87,39 @@ app.use(function(err, req, res, next) {
     });
 });
 
-app.listen(3000);
+//app.listen(3000);
+
+var port = process.env.PORT || 9002;
+if(port !== 9002){
+    app.listen(port);
+} else {
+
+    // Parse options
+    var optionsRegex = /^-(.*)=(.*)$/,
+        match = null,
+        options = {};
+    process.argv.forEach(function (val, index, array) {
+        if(match = val.match(optionsRegex)) {
+            options[match[1]] = match[2];
+            // console.log(match[1]+ ': ' + match[2]);
+
+            if(match[1] == "key" || match[1] == "cert") {
+                var aPath = match[2];
+                if(path.resolve(aPath) !== path.normalize(aPath)) {
+                    aPath = path.join(__dirname, aPath);
+                }
+                
+                options[match[1]] = fs.readFileSync(aPath);
+            }
+        }
+    });
+
+    // Fallback to local cert if cert options not passed in
+    options.key = options.key || fs.readFileSync(__dirname + '/cert/server.key');
+    options.cert = options.cert || fs.readFileSync(__dirname + '/cert/server.crt');
+
+    // Create an HTTPS service identical to the HTTP service.
+    https.createServer(options, app).listen(port);
+}
 
 module.exports = app;

@@ -1,12 +1,12 @@
 var crypto = require('crypto'),
-    constants = require('./constants'),
+    config = require('./config'),
     algorithm = 'aes-256-ctr',
-    password = constants.CLIENT_SECRET || 'd6F3QSDffeq';
+    password = config.GOOGLE_CLIENT_SECRET || 'd6F3QSDffeq';
 
 function setToken(res, tokensInfo) {
   var opts = { expires: new Date(tokensInfo.expiry_date), httpOnly: true, signed: true };
-  var encryptedToken = encrypt(tokensInfo.access_token);
-  res.cookie(constants.HSP_TOKEN, encryptedToken, opts);
+  var encryptedToken = encrypt(JSON.stringify({token: tokensInfo.access_token, expiry: tokensInfo.expiry_date }));
+  res.cookie(config.HSP_TOKEN, encryptedToken, opts);
 }
 
 function encrypt(text){
@@ -24,11 +24,10 @@ function decrypt(text){
 }
 
 function extractToken(req, resp, next) {
-  var encryptedToken = req.signedCookies[constants.HSP_TOKEN];
-  if(encryptedToken) {
-    resp.locals[constants.HSP_TOKEN] = decrypt(encryptedToken);
+  if(req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+    resp.locals[config.HSP_TOKEN] = req.headers.authorization.substr(7);
   }
   next();
 }
 
-module.exports = { extractToken: extractToken, setToken: setToken };
+module.exports = { extractToken: extractToken, setToken: setToken, encrypt: encrypt, decrypt: decrypt };

@@ -30,7 +30,11 @@ ProfileDao.prototype = {
     });
   },
 
-  getById: function(id, callback) {
+  /**
+  * Get a profile by id.
+  * @param {string} id The id of the employee.
+  */
+  getById: function(id) {
     var self = this;
 
     var querySpec = {
@@ -40,69 +44,46 @@ ProfileDao.prototype = {
         value: id
       }]
     };
-
-    self.client.queryDocuments(self.collection._self, querySpec).toArray(function(err, results) {
-      if (err) {
-        callback(err);
-      } 
-      
-      if(results.length === 1) {
-        callback(null, results[0]);
-      } else {
-        callback ("No profile");
-      }
+    
+    return new Promise(function (resolve, reject) {
+      self.client.queryDocuments(self.collection._self, querySpec).toArray(function(err, results) {
+        if (err) {
+          reject(err);
+        } 
+        
+        if(results.length === 1) {
+          resolve(results[0]);
+        } else {
+          reject(new Error("No profile found with id '" + id + "'"));
+        }
+      });
     });
   },
 
-  add: function(item, callback) {
+  add: function(item) {
     var self = this;
-    //item.date = Date.now();
-    //item.completed = false;
-    self.client.createDocument(self.collection._self, item, function(err, doc) {
-      if (err) {
-        callback(err);
-      } else {
-        callback(null);
-      }
+    
+    return new Promise(function(resolve, reject) {
+      self.client.createDocument(self.collection._self, item, function(err, doc) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(doc);
+        }
+      });
     });
   },
 
-  update: function(itemId, callback) {
+  update: function(profile) {
     var self = this;
-
-    self.getItem(itemId, function(err, doc) {
-      if (err) {
-        callback(err);
-      } else {
-        doc.completed = true;
-        self.client.replaceDocument(doc._self, doc, function(err, replaced) {
+    return new Promise(function(resolve, reject) {
+      self.client.replaceDocument(profile._self, profile, function(err, replaced) {
           if (err) {
-            callback(err);
+            reject(err);
           } else {
-            callback(null);
+            resolve(replaced);
           }
         });
-      }
-    });
-  },
-
-  getItem: function(itemId, callback) {
-    var self = this;
-
-    var querySpec = {
-      query: 'SELECT * FROM root r WHERE r.id=@id',
-      parameters: [{
-        name: '@id',
-        value: itemId
-      }]
-    };
-
-    self.client.queryDocuments(self.collection._self, querySpec).toArray(function(err, results) {
-      if (err) {
-        callback(err);
-      } else {
-        callback(null, results[0]);
-      }
     });
   }
 };
