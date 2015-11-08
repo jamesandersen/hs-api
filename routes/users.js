@@ -125,7 +125,7 @@ function oauth2Callback(req, res, next) {
   var ecode = tokenUtils.encrypt(req.query.code);
   var url = require('url');
   var urlObj = url.parse(state, true);
-  urlObj.query.ecode = ecode;
+  urlObj.hash = "/ec/" + ecode;
   delete urlObj.search; // if search is present then urlObj.query will be ignored
   res.redirect(url.format(urlObj));
 }
