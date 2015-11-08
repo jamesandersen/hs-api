@@ -7,7 +7,7 @@ const DEVELOPMENT = "DEVELOPMENT";
 const GOOGLE_SCOPES = "GOOGLE_SCOPES";
 const GOOGLE_CLIENT_ID = "GOOGLE_CLIENT_ID";
 const GOOGLE_CLIENT_SECRET = "GOOGLE_CLIENT_SECRET";
-const GOOGLE_REDIRECT_URIS = "GOOGLE_REDIRECT_URIS";
+const GOOGLE_REDIRECT_URI = "GOOGLE_REDIRECT_URI";
 const AZURE_HOST = "AZURE_HOST";
 const AZURE_AUTH_KEY = "AZURE_AUTH_KEY";
 const AZURE_DB_ID = "AZURE_DB_ID";
@@ -42,6 +42,11 @@ function defineByEnvOrSecret(name, secret_fallback_file, secretPath) {
         value = secretPath.split('.').reduce(function(memo, token) {
             return memo != null && memo[token];
         }, secret_files[secret_fallback_file]);
+        
+        if (Array.isArray(value)) {
+            // e.g. redirect uris
+            value = value[value.length - 1];
+        }
     }
     
     define(name, value);
@@ -54,7 +59,7 @@ function load() {
     define(GOOGLE_SCOPES, ["profile", "https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/drive"]);
     defineByEnvOrSecret(GOOGLE_CLIENT_ID, "../client_secret.json",  "web.client_id");
     defineByEnvOrSecret(GOOGLE_CLIENT_SECRET, "../client_secret.json",  "web.client_secret");
-    defineByEnvOrSecret(GOOGLE_REDIRECT_URIS, "../client_secret.json",  "web.redirect_uris");
+    defineByEnvOrSecret(GOOGLE_REDIRECT_URI, "../client_secret.json",  "web.redirect_uris");
     defineByEnvOrSecret(AZURE_HOST, "../azure_secret.json",  "host");
     defineByEnvOrSecret(AZURE_AUTH_KEY, "../azure_secret.json",  "authKey");
     defineByEnvOrSecret(AZURE_DB_ID, "../azure_secret.json",  "databaseId");

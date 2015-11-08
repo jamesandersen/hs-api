@@ -7,7 +7,7 @@ var tokenUtils = require('../utils/tokens');
 var google = require('googleapis');
 var plus = google.plus('v1');
 var OAuth2 = google.auth.OAuth2;
-var oauth2Client = new OAuth2(config.GOOGLE_CLIENT_ID, config.GOOGLE_CLIENT_SECRET, config.GOOGLE_REDIRECT_URIS[2]);
+var oauth2Client = new OAuth2(config.GOOGLE_CLIENT_ID, config.GOOGLE_CLIENT_SECRET, config.GOOGLE_REDIRECT_URI);
 
 var DocumentDBClient = require('documentdb').DocumentClient;
 var docDbClient = new DocumentDBClient(config.AZURE_HOST, {
